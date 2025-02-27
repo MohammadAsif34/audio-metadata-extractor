@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Audio metadata extractor</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
+  </head>
+  <style>
+    body {
+      user-select: none;
+      height: 90vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .main {
+      width: fit-content; 
+      padding: 4px 16px;
+      border: 1px solid black;
+      border-radius: 8px;
+      h1 {
+        text-align: center;
+      }
+      div {
+        margin-top: 10px;
+        border: 0px solid red;
+        button {
+          float: right;
+        }
+      }
+    }
+    .data {
+      display: flex;
+    }
+    #cover,
+    .details {
+      margin: 10px 0;
+      width: 300px;
+      height: 300px;
+      border: 1px solid black;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    #cover {
+      background-position: center;
+      background-size: contain;
+      background-repeat: no-repeat;
+    }
+    .details {
+      padding-left: 20px;
+      border: none;
+    }
+  </style>
+  <body>
+    <div class="main">
+      <h1>Audio Metadata Extractor</h1>
+      <div>
+        <label for=""> Audio file : </label>
+        <input type="file" type=".mp3, .wav" id="fileInput" />
+        <button id="fileBtn">Exract from File</button>
+      </div>
+      <div>
+        <label for=""> Audio link : </label>
+        <input type="text" id="linkInput" placeholder="audio link" />
+        <button id="linkBtn">Exract from Link</button>
+      </div>
+      <div class="data">
+        <div id="cover"></div>
+        <div class="details">
+          <p id="title">Title :</p>
+          <p id="artist">Artist :</p>
+          <p id="album">Album :</p>
+          <p id="genre">Genre :</p>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.querySelector("#fileBtn").addEventListener("click", function () {
+        const file = document.querySelector("#fileInput").files[0];
+
+        getMetadata(file);
+      });
+      document.querySelector("#linkBtn").addEventListener("click", function () {
+        const link = document.querySelector("#linkInput").value;
+
+        getMetadata(link);
+      });
+
+      async function getMetadata(file) {
+        const jsmediatags = window.jsmediatags;
+        jsmediatags.read(file, {
+          onSuccess: (tag) => {
+            const data = tag.tags.picture.data;
+            const format = tag.tags.picture.format;
+            let base64String = "";
+            for (let i = 0; i < data.length; i++) {
+              base64String += String.fromCharCode(data[i]);
+            }
+            document.querySelector(
+              "#cover"
+            ).style.backgroundImage = `url(data:${format};base64,${window.btoa(
+              base64String
+            )})`;
+            document.querySelector("#title").textContent =
+              "Title: " + (tag.tags.title || "Unknown");
+            document.querySelector("#artist").textContent =
+              "Artist: " + (tag.tags.artist || "Unknown");
+            document.querySelector("#album").textContent =
+              "Album: " + (tag.tags.album || "Unknown");
+            document.querySelector("#genre").textContent =
+              "Genre: " + (tag.tags.genre || "Unknown");
+          },
+        });
+      }
+    </script>
+  </body>
+</html>
