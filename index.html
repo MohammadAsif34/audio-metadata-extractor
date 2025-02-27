@@ -15,7 +15,7 @@
       justify-content: center;
     }
     .main {
-      width: fit-content; 
+      width: fit-content;
       padding: 4px 16px;
       border: 1px solid black;
       border-radius: 8px;
@@ -57,7 +57,7 @@
       <h1>Audio Metadata Extractor</h1>
       <div>
         <label for=""> Audio file : </label>
-        <input type="file" type=".mp3, .wav" id="fileInput" />
+        <input type="file" accept=".mp3, .wav" id="fileInput" />
         <button id="fileBtn">Exract from File</button>
       </div>
       <div>
@@ -79,12 +79,18 @@
     <script>
       document.querySelector("#fileBtn").addEventListener("click", function () {
         const file = document.querySelector("#fileInput").files[0];
-
+        if (!file) {
+          alert("please select file");
+          return;
+        }
         getMetadata(file);
       });
       document.querySelector("#linkBtn").addEventListener("click", function () {
         const link = document.querySelector("#linkInput").value;
-
+        if (!link) {
+          alert("please enter link");
+          return;
+        }
         getMetadata(link);
       });
 
@@ -92,17 +98,20 @@
         const jsmediatags = window.jsmediatags;
         jsmediatags.read(file, {
           onSuccess: (tag) => {
-            const data = tag.tags.picture.data;
-            const format = tag.tags.picture.format;
-            let base64String = "";
-            for (let i = 0; i < data.length; i++) {
-              base64String += String.fromCharCode(data[i]);
+            if (tag.tags.picture) {
+              const data = tag.tags.picture.data;
+              const format = tag.tags.picture.format;
+              let base64String = "";
+              for (let i = 0; i < data.length; i++) {
+                base64String += String.fromCharCode(data[i]);
+              }
+              document.querySelector(
+                "#cover"
+              ).style.backgroundImage = `url(data:${format};base64,${window.btoa(
+                base64String
+              )})`;
             }
-            document.querySelector(
-              "#cover"
-            ).style.backgroundImage = `url(data:${format};base64,${window.btoa(
-              base64String
-            )})`;
+
             document.querySelector("#title").textContent =
               "Title: " + (tag.tags.title || "Unknown");
             document.querySelector("#artist").textContent =
